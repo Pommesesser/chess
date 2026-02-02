@@ -88,15 +88,17 @@ class GameState(val data: Array<Array<Piece?>>) {
             legalMoves.add(c)
         }
 
-        val captureOffsets = if (piece.color == PieceColor.WHITE) listOf(-1 to -1, -1 to 1)
-        else listOf(1 to -1, 1 to 1)
+        val captureOffsets = if (piece.color == PieceColor.WHITE)
+            listOf(-1 to -1, -1 to 1)
+        else
+            listOf(1 to -1, 1 to 1)
 
         for ((dr, dc) in captureOffsets) {
             val r = from.first + dr
             val c = from.second + dc
-            if (r in 0..7 && c in 0..7 && data[r][c]?.color == piece.color) {
+            val target = data[r][c]
+            if (r in 0..7 && c in 0..7 && target != null && target.color != piece.color)
                 legalMoves.add(Pair(r, c))
-            }
         }
 
         return legalMoves

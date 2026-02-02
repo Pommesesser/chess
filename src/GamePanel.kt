@@ -7,7 +7,7 @@ import javax.swing.JPanel
 const val tileSize = DIM / 8
 
 class GamePanel: JPanel() {
-    var state = testGameState()
+    var state = initialGameState()
     var selection: Pair<Int, Int>? = null
 
     init {
@@ -76,7 +76,24 @@ class GamePanel: JPanel() {
     }
 
     fun handleClick(r: Int, c: Int) {
-        selection = Pair(r,c)
-        repaint()
+        if (selection == null) {
+            selection = Pair(r,c)
+            repaint()
+            return
+        }
+
+        val oldSelection = selection!!
+        val newSelection = r to c
+        val oldSelectionLegalMoves = state.legalMoves(oldSelection)
+
+        if (oldSelectionLegalMoves.contains(newSelection)) {
+            state.data[newSelection.first][newSelection.second] = state.data[oldSelection.first][oldSelection.second]
+            state.data[oldSelection.first][oldSelection.second] = null
+            selection = null
+            repaint()
+        } else {
+            selection = newSelection
+            repaint()
+        }
     }
 }
