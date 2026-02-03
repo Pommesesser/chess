@@ -2,50 +2,49 @@ fun initialGameState(): GameState {
     val board = Array(8) { arrayOfNulls<Piece>(8) }
 
     for (c in 0..7) {
-        board[1][c] = Piece(PieceType.PAWN, PieceColor.BLACK)
-        board[6][c] = Piece(PieceType.PAWN, PieceColor.WHITE)
+        board[1][c] = Piece(PieceType.PAWN, PieceColor.BLACK, 1, c)
+        board[6][c] = Piece(PieceType.PAWN, PieceColor.WHITE, 6, c)
     }
 
-    board[0][0] = Piece(PieceType.ROOK, PieceColor.BLACK)
-    board[0][7] = Piece(PieceType.ROOK, PieceColor.BLACK)
-    board[7][0] = Piece(PieceType.ROOK, PieceColor.WHITE)
-    board[7][7] = Piece(PieceType.ROOK, PieceColor.WHITE)
+    board[0][0] = Piece(PieceType.ROOK, PieceColor.BLACK, 0, 0)
+    board[0][7] = Piece(PieceType.ROOK, PieceColor.BLACK, 0, 7)
+    board[7][0] = Piece(PieceType.ROOK, PieceColor.WHITE, 7, 0)
+    board[7][7] = Piece(PieceType.ROOK, PieceColor.WHITE, 7, 7)
 
-    board[0][1] = Piece(PieceType.KNIGHT, PieceColor.BLACK)
-    board[0][6] = Piece(PieceType.KNIGHT, PieceColor.BLACK)
-    board[7][1] = Piece(PieceType.KNIGHT, PieceColor.WHITE)
-    board[7][6] = Piece(PieceType.KNIGHT, PieceColor.WHITE)
+    board[0][1] = Piece(PieceType.KNIGHT, PieceColor.BLACK, 0, 1)
+    board[0][6] = Piece(PieceType.KNIGHT, PieceColor.BLACK, 0, 6)
+    board[7][1] = Piece(PieceType.KNIGHT, PieceColor.WHITE, 7, 1)
+    board[7][6] = Piece(PieceType.KNIGHT, PieceColor.WHITE, 7, 6)
 
-    board[0][2] = Piece(PieceType.BISHOP, PieceColor.BLACK)
-    board[0][5] = Piece(PieceType.BISHOP, PieceColor.BLACK)
-    board[7][2] = Piece(PieceType.BISHOP, PieceColor.WHITE)
-    board[7][5] = Piece(PieceType.BISHOP, PieceColor.WHITE)
+    board[0][2] = Piece(PieceType.BISHOP, PieceColor.BLACK, 0, 2)
+    board[0][5] = Piece(PieceType.BISHOP, PieceColor.BLACK, 0, 5)
+    board[7][2] = Piece(PieceType.BISHOP, PieceColor.WHITE, 7, 2)
+    board[7][5] = Piece(PieceType.BISHOP, PieceColor.WHITE, 7, 5)
 
-    board[0][3] = Piece(PieceType.QUEEN, PieceColor.BLACK)
-    board[7][3] = Piece(PieceType.QUEEN, PieceColor.WHITE)
+    board[0][3] = Piece(PieceType.QUEEN, PieceColor.BLACK, 0, 3)
+    board[7][3] = Piece(PieceType.QUEEN, PieceColor.WHITE, 7, 3)
 
-    board[0][4] = Piece(PieceType.KING, PieceColor.BLACK)
-    board[7][4] = Piece(PieceType.KING, PieceColor.WHITE)
+    board[0][4] = Piece(PieceType.KING, PieceColor.BLACK, 0, 4)
+    board[7][4] = Piece(PieceType.KING, PieceColor.WHITE, 7, 4)
 
     return GameState(board)
 }
 
-
 fun testGameState(): GameState {
     val board = Array(8) { arrayOfNulls<Piece>(8) }
 
-    board[0][4] = Piece(PieceType.KING, PieceColor.BLACK)
-    board[1][2] = Piece(PieceType.ROOK, PieceColor.BLACK)
-    board[2][5] = Piece(PieceType.KNIGHT, PieceColor.BLACK)
-    board[3][1] = Piece(PieceType.PAWN, PieceColor.BLACK)
-    board[3][3] = Piece(PieceType.QUEEN, PieceColor.BLACK)
+    board[0][4] = Piece(PieceType.KING, PieceColor.BLACK, 0, 4)
+    board[1][2] = Piece(PieceType.ROOK, PieceColor.BLACK, 1, 2)
+    board[2][5] = Piece(PieceType.KNIGHT, PieceColor.BLACK, 2, 5)
+    board[3][1] = Piece(PieceType.PAWN, PieceColor.BLACK, 3, 1)
+    board[3][3] = Piece(PieceType.QUEEN, PieceColor.BLACK, 3, 3)
 
-    board[5][4] = Piece(PieceType.QUEEN, PieceColor.WHITE)
-    board[7][4] = Piece(PieceType.KING, PieceColor.WHITE)
-    board[6][5] = Piece(PieceType.ROOK, PieceColor.WHITE)
-    board[5][2] = Piece(PieceType.BISHOP, PieceColor.WHITE)
-    board[4][6] = Piece(PieceType.PAWN, PieceColor.WHITE)
-    board[5][7] = Piece(PieceType.KNIGHT, PieceColor.WHITE)
+    board[5][4] = Piece(PieceType.QUEEN, PieceColor.WHITE, 5, 4)
+    board[7][4] = Piece(PieceType.KING, PieceColor.WHITE, 7, 4)
+    board[6][5] = Piece(PieceType.ROOK, PieceColor.WHITE, 6, 5)
+    board[5][2] = Piece(PieceType.BISHOP, PieceColor.WHITE, 5, 2)
+    board[4][6] = Piece(PieceType.PAWN, PieceColor.WHITE, 4, 6)
+    board[5][7] = Piece(PieceType.KNIGHT, PieceColor.WHITE, 5, 7)
 
     return GameState(board)
 }
@@ -78,7 +77,7 @@ class GameState(val data: Array<Array<Piece?>>) {
                 arrayOf(Pair(from.first + 1, from.second))
         }
 
-        val inBoundsCoordinates = rawCoordinates.filter { it.first in (0..7) && it.second in (0..7) }
+        val inBoundsCoordinates = rawCoordinates.filter { inBounds(it) }
 
         val legalMoves = mutableListOf<Pair<Int, Int>>()
         for (c in inBoundsCoordinates) {
@@ -160,7 +159,7 @@ class GameState(val data: Array<Array<Piece?>>) {
             from.first - 1 to from.second + 2,
             from.first - 1 to from.second - 2
         )
-            .filter { it.first in (0..7) && it.second in (0..7) }
+            .filter { inBounds(it) }
             .filter {
                 val target = data[it.first][it.second]
                 if (target == null)
@@ -178,7 +177,7 @@ class GameState(val data: Array<Array<Piece?>>) {
         val legalMoves = mutableListOf<Pair<Int, Int>>()
         for (i in 1..7) {
             val rawTargetCoordinate = from.first - i to from.second - i
-            if (rawTargetCoordinate.first !in (0..7) || rawTargetCoordinate.second !in (0..7))
+            if (!inBounds(rawTargetCoordinate))
                 break
 
             val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
@@ -192,7 +191,7 @@ class GameState(val data: Array<Array<Piece?>>) {
 
         for (i in 1..7) {
             val rawTargetCoordinate = from.first + i to from.second - i
-            if (rawTargetCoordinate.first !in (0..7) || rawTargetCoordinate.second !in (0..7))
+            if (!inBounds(rawTargetCoordinate))
                 break
 
             val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
@@ -206,7 +205,7 @@ class GameState(val data: Array<Array<Piece?>>) {
 
         for (i in 1..7) {
             val rawTargetCoordinate = from.first + i to from.second + i
-            if (rawTargetCoordinate.first !in (0..7) || rawTargetCoordinate.second !in (0..7))
+            if (!inBounds(rawTargetCoordinate))
                 break
 
             val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
@@ -220,7 +219,7 @@ class GameState(val data: Array<Array<Piece?>>) {
 
         for (i in 1..7) {
             val rawTargetCoordinate = from.first - i to from.second + i
-            if (rawTargetCoordinate.first !in (0..7) || rawTargetCoordinate.second !in (0..7))
+            if (!inBounds(rawTargetCoordinate))
                 break
 
             val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
@@ -247,13 +246,12 @@ class GameState(val data: Array<Array<Piece?>>) {
             from.first - 1 to from.second,
             from.first - 1 to from.second + 1,
             from.first to from.second - 1,
-            from.first to from.second,
             from.first to from.second + 1,
             from.first + 1 to from.second - 1,
             from.first + 1 to from.second,
             from.first + 1 to from.second + 1,
         )
-            .filter { it.first in (0..7) && it.second in (0..7) }
+            .filter { inBounds(it)}
             .filter {
                 val target = data[it.first][it.second]
                 if (target == null)
@@ -264,4 +262,20 @@ class GameState(val data: Array<Array<Piece?>>) {
                     false
             }
     }
+
+    fun move(piece: Piece, target: Pair<Int, Int>) {
+        require(inBounds(target))
+        data[target.first][target.second] = piece
+        data[piece.r][piece.c] = null
+        piece.r = target.first
+        piece.c = target.second
+    }
+
+    fun threatenedBy(target: Pair<Int, Int>, color: PieceColor): Boolean {
+        require(inBounds(target))
+        TODO()
+    }
+
+    fun pieces(): List<Piece> = data.flatMap { it.filterNotNull() }
+    fun inBounds(pair: Pair<Int, Int>): Boolean = pair.first in (0..7) && pair.second in (0..7)
 }

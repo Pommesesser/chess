@@ -87,8 +87,7 @@ class GamePanel: JPanel() {
         val oldSelectionLegalMoves = state.legalMoves(oldSelection)
 
         if (oldSelectionLegalMoves.contains(newSelection)) {
-            state.data[newSelection.first][newSelection.second] = state.data[oldSelection.first][oldSelection.second]
-            state.data[oldSelection.first][oldSelection.second] = null
+            state.move()
             selection = null
             repaint()
         } else {
