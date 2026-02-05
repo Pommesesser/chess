@@ -48,43 +48,41 @@ fun testGameState(): GameState {
 
     return GameState(board)
 }
-
 class GameState(val data: Array<Array<Piece?>>) {
-    fun legalMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second] ?: return emptyList()
+    fun legalMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c] ?: return emptyList()
         return when (piece.type) {
-            PieceType.PAWN -> legalPawnMoves(from)
-            PieceType.ROOK -> legalRookMoves(from)
-            PieceType.KNIGHT -> legalKnightMoves(from)
-            PieceType.BISHOP -> legalBishopMoves(from)
-            PieceType.QUEEN -> legalQueenMoves(from)
-            PieceType.KING -> legalKingMoves(from)
+            PieceType.PAWN -> legalPawnMoves(r, c)
+            PieceType.ROOK -> legalRookMoves(r, c)
+            PieceType.KNIGHT -> legalKnightMoves(r, c)
+            PieceType.BISHOP -> legalBishopMoves(r, c)
+            PieceType.QUEEN -> legalQueenMoves(r, c)
+            PieceType.KING -> legalKingMoves(r, c)
         }
     }
 
-    fun legalPawnMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second]!!
+    fun legalPawnMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c]!!
 
         val rawCoordinates = if (piece.color == PieceColor.WHITE) {
-            if (from.first == 6)
-                arrayOf(Pair(from.first - 1, from.second), Pair(from.first - 2, from.second))
+            if (r == 6)
+                arrayOf(r - 1 to c, r - 2 to c)
             else
-                arrayOf(Pair(from.first - 1, from.second))
+                arrayOf(r - 1 to c)
         } else {
-            if (from.first == 1)
-                arrayOf(Pair(from.first + 1, from.second), Pair(from.first + 2, from.second))
+            if (r == 1)
+                arrayOf(r + 1 to c, r + 2 to c)
             else
-                arrayOf(Pair(from.first + 1, from.second))
+                arrayOf(r + 1 to c)
         }
 
-        val inBoundsCoordinates = rawCoordinates.filter { inBounds(it) }
+        val inBoundsCoordinates = rawCoordinates.filter { inBounds(it.first, it.second) }
 
         val legalMoves = mutableListOf<Pair<Int, Int>>()
-        for (c in inBoundsCoordinates) {
-            if (data[c.first][c.second] != null)
+        for (p in inBoundsCoordinates) {
+            if (data[p.first][p.second] != null)
                 break
-
-            legalMoves.add(c)
+            legalMoves.add(p)
         }
 
         val captureOffsets = if (piece.color == PieceColor.WHITE)
@@ -93,189 +91,161 @@ class GameState(val data: Array<Array<Piece?>>) {
             listOf(1 to -1, 1 to 1)
 
         for ((dr, dc) in captureOffsets) {
-            val r = from.first + dr
-            val c = from.second + dc
-            val target = data[r][c]
-            if (r in 0..7 && c in 0..7 && target != null && target.color != piece.color)
-                legalMoves.add(Pair(r, c))
+            val tr = r + dr
+            val tc = c + dc
+            if (tr in 0..7 && tc in 0..7) {
+                val target = data[tr][tc]
+                if (target != null && target.color != piece.color)
+                    legalMoves.add(tr to tc)
+            }
         }
 
         return legalMoves
     }
 
-    fun legalRookMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second]!!
+    fun legalRookMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c]!!
         val legalMoves = mutableListOf<Pair<Int, Int>>()
 
-        for (r in from.first + 1..7) {
-            if (data[r][from.second] == null) {
-                legalMoves.add(Pair(r, from.second))
-            } else if (data[r][from.second]!!.color != piece.color) {
-                legalMoves.add(Pair(r, from.second))
-                break
+        for (rr in r + 1..7) {
+            if (data[rr][c] == null) legalMoves.add(rr to c)
+            else if (data[rr][c]!!.color != piece.color) {
+                legalMoves.add(rr to c); break
             } else break
         }
 
-        for (r in from.first - 1 downTo 0) {
-            if (data[r][from.second] == null) {
-                legalMoves.add(Pair(r, from.second))
-            } else if (data[r][from.second]!!.color != piece.color) {
-                legalMoves.add(Pair(r, from.second))
-                break
+        for (rr in r - 1 downTo 0) {
+            if (data[rr][c] == null) legalMoves.add(rr to c)
+            else if (data[rr][c]!!.color != piece.color) {
+                legalMoves.add(rr to c); break
             } else break
         }
 
-        for (c in from.second + 1..7) {
-            if (data[from.first][c] == null) {
-                legalMoves.add(Pair(from.first, c))
-            } else if (data[from.first][c]!!.color != piece.color) {
-                legalMoves.add(Pair(from.first, c))
-                break
+        for (cc in c + 1..7) {
+            if (data[r][cc] == null) legalMoves.add(r to cc)
+            else if (data[r][cc]!!.color != piece.color) {
+                legalMoves.add(r to cc); break
             } else break
         }
 
-        for (c in from.second - 1 downTo 0) {
-            if (data[from.first][c] == null) {
-                legalMoves.add(Pair(from.first, c))
-            } else if (data[from.first][c]!!.color != piece.color) {
-                legalMoves.add(Pair(from.first, c))
-                break
+        for (cc in c - 1 downTo 0) {
+            if (data[r][cc] == null) legalMoves.add(r to cc)
+            else if (data[r][cc]!!.color != piece.color) {
+                legalMoves.add(r to cc); break
             } else break
         }
 
         return legalMoves
     }
 
-    fun legalKnightMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second]!!
+    fun legalKnightMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c]!!
 
         return listOf(
-            from.first + 2 to from.second + 1,
-            from.first + 2 to from.second - 1,
-            from.first - 2 to from.second + 1,
-            from.first - 2 to from.second - 1,
-            from.first + 1 to from.second + 2,
-            from.first + 1 to from.second - 2,
-            from.first - 1 to from.second + 2,
-            from.first - 1 to from.second - 2
+            r + 2 to c + 1,
+            r + 2 to c - 1,
+            r - 2 to c + 1,
+            r - 2 to c - 1,
+            r + 1 to c + 2,
+            r + 1 to c - 2,
+            r - 1 to c + 2,
+            r - 1 to c - 2
         )
-            .filter { inBounds(it) }
+            .filter { inBounds(it.first, it.second) }
             .filter {
                 val target = data[it.first][it.second]
-                if (target == null)
-                    true
-                else if (target.color != piece.color)
-                    true
-                else
-                    false
+                target == null || target.color != piece.color
             }
     }
 
-    fun legalBishopMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second]!!
-
+    fun legalBishopMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c]!!
         val legalMoves = mutableListOf<Pair<Int, Int>>()
-        for (i in 1..7) {
-            val rawTargetCoordinate = from.first - i to from.second - i
-            if (!inBounds(rawTargetCoordinate))
-                break
 
-            val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
-            if (target == null) {
-                legalMoves.add(rawTargetCoordinate)
-            } else if (target.color != piece.color) {
-                legalMoves.add(rawTargetCoordinate)
-                break
+        for (i in 1..7) {
+            val tr = r - i
+            val tc = c - i
+            if (!inBounds(tr, tc)) break
+            val target = data[tr][tc]
+            if (target == null) legalMoves.add(tr to tc)
+            else if (target.color != piece.color) {
+                legalMoves.add(tr to tc); break
             } else break
         }
 
         for (i in 1..7) {
-            val rawTargetCoordinate = from.first + i to from.second - i
-            if (!inBounds(rawTargetCoordinate))
-                break
-
-            val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
-            if (target == null) {
-                legalMoves.add(rawTargetCoordinate)
-            } else if (target.color != piece.color) {
-                legalMoves.add(rawTargetCoordinate)
-                break
+            val tr = r + i
+            val tc = c - i
+            if (!inBounds(tr, tc)) break
+            val target = data[tr][tc]
+            if (target == null) legalMoves.add(tr to tc)
+            else if (target.color != piece.color) {
+                legalMoves.add(tr to tc); break
             } else break
         }
 
         for (i in 1..7) {
-            val rawTargetCoordinate = from.first + i to from.second + i
-            if (!inBounds(rawTargetCoordinate))
-                break
-
-            val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
-            if (target == null) {
-                legalMoves.add(rawTargetCoordinate)
-            } else if (target.color != piece.color) {
-                legalMoves.add(rawTargetCoordinate)
-                break
+            val tr = r + i
+            val tc = c + i
+            if (!inBounds(tr, tc)) break
+            val target = data[tr][tc]
+            if (target == null) legalMoves.add(tr to tc)
+            else if (target.color != piece.color) {
+                legalMoves.add(tr to tc); break
             } else break
         }
 
         for (i in 1..7) {
-            val rawTargetCoordinate = from.first - i to from.second + i
-            if (!inBounds(rawTargetCoordinate))
-                break
-
-            val target = data[rawTargetCoordinate.first][rawTargetCoordinate.second]
-            if (target == null) {
-                legalMoves.add(rawTargetCoordinate)
-            } else if (target.color != piece.color) {
-                legalMoves.add(rawTargetCoordinate)
-                break
+            val tr = r - i
+            val tc = c + i
+            if (!inBounds(tr, tc)) break
+            val target = data[tr][tc]
+            if (target == null) legalMoves.add(tr to tc)
+            else if (target.color != piece.color) {
+                legalMoves.add(tr to tc); break
             } else break
         }
 
         return legalMoves
     }
 
-    fun legalQueenMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        return legalRookMoves(from) + legalBishopMoves(from)
+    fun legalQueenMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        return legalRookMoves(r, c) + legalBishopMoves(r, c)
     }
 
-    fun legalKingMoves(from: Pair<Int, Int>): List<Pair<Int, Int>> {
-        val piece = data[from.first][from.second]!!
+    fun legalKingMoves(r: Int, c: Int): List<Pair<Int, Int>> {
+        val piece = data[r][c]!!
 
         return listOf(
-            from.first - 1 to from.second - 1,
-            from.first - 1 to from.second,
-            from.first - 1 to from.second + 1,
-            from.first to from.second - 1,
-            from.first to from.second + 1,
-            from.first + 1 to from.second - 1,
-            from.first + 1 to from.second,
-            from.first + 1 to from.second + 1,
+            r - 1 to c - 1,
+            r - 1 to c,
+            r - 1 to c + 1,
+            r to c - 1,
+            r to c + 1,
+            r + 1 to c - 1,
+            r + 1 to c,
+            r + 1 to c + 1
         )
-            .filter { inBounds(it)}
+            .filter { inBounds(it.first, it.second) }
             .filter {
                 val target = data[it.first][it.second]
-                if (target == null)
-                    true
-                else if (target.color != piece.color)
-                    true
-                else
-                    false
+                target == null || target.color != piece.color
             }
     }
 
-    fun move(piece: Piece, target: Pair<Int, Int>) {
-        require(inBounds(target))
-        data[target.first][target.second] = piece
+    fun move(piece: Piece, r: Int, c: Int) {
+        require(inBounds(r, c))
+        data[r][c] = piece
         data[piece.r][piece.c] = null
-        piece.r = target.first
-        piece.c = target.second
+        piece.r = r
+        piece.c = c
     }
 
-    fun threatenedBy(target: Pair<Int, Int>, color: PieceColor): Boolean {
-        require(inBounds(target))
+    fun threatenedBy(r: Int, c: Int, color: PieceColor): Boolean {
+        require(inBounds(r, c))
         TODO()
     }
 
     fun pieces(): List<Piece> = data.flatMap { it.filterNotNull() }
-    fun inBounds(pair: Pair<Int, Int>): Boolean = pair.first in (0..7) && pair.second in (0..7)
+    fun inBounds(r: Int, c: Int): Boolean = r in 0..7 && c in 0..7
 }

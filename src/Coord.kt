@@ -1,1 +1,0 @@
-class Coord(r: Int, c: Int)

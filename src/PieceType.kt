@@ -1,7 +1,7 @@
 enum class PieceType {
     PAWN,
-    ROOK,
     KNIGHT,
+    ROOK,
     BISHOP,
     QUEEN,
     KING

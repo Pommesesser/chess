@@ -1,0 +1,1 @@
+class Point(r: Int, c: Int)

@@ -50,7 +50,7 @@ class GamePanel: JPanel() {
 
     fun highlightLegalMoves(g: Graphics) {
         selection?.let {
-            val legalMoves = state.legalMoves(it)
+            val legalMoves = state.legalMoves(it.first, it.second)
 
             g.color = Color(255, 0, 0, 100)
             legalMoves.forEach { move ->
@@ -82,16 +82,16 @@ class GamePanel: JPanel() {
             return
         }
 
-        val oldSelection = selection!!
-        val newSelection = r to c
-        val oldSelectionLegalMoves = state.legalMoves(oldSelection)
+        val or = selection!!.first
+        val oc = selection!!.second
+        val oldSelectionLegalMoves = state.legalMoves(or, oc)
 
-        if (oldSelectionLegalMoves.contains(newSelection)) {
-            state.move()
+        if (oldSelectionLegalMoves.contains(r to c)) {
+            state.move(state.data[or][oc]!!, r, c)
             selection = null
             repaint()
         } else {
-            selection = newSelection
+            selection = r to c
             repaint()
         }
     }
