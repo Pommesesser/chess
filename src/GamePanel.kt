@@ -7,8 +7,8 @@ import javax.swing.JPanel
 const val tileSize = DIM / 8
 
 class GamePanel: JPanel() {
-    var state = initialGameState()
-    var selection: Pair<Int, Int>? = null
+    var state = initialState()
+    var selectedTile: Tile? = null
 
     init {
         addMouseListener(object : MouseAdapter() {
@@ -42,57 +42,56 @@ class GamePanel: JPanel() {
     }
 
     fun highlightSelected(g: Graphics) {
-        selection?.let {
+        selectedTile?.let {
             g.color = Color(0, 255, 0, 100)
-            g.fillRect(it.second * tileSize, it.first * tileSize, tileSize, tileSize)
+            g.fillRect(it.c * tileSize, it.r * tileSize, tileSize, tileSize)
         }
     }
 
     fun highlightLegalMoves(g: Graphics) {
-        selection?.let {
-            val legalMoves = state.legalMoves(it.first, it.second)
+        selectedTile?.let { selection ->
+            state.tile(selection.r, selection.c)?.let { tile ->
+                val legalMoves = state.legalMoves(tile)
 
-            g.color = Color(255, 0, 0, 100)
-            legalMoves.forEach { move ->
-                g.fillRect(move.second * tileSize, move.first * tileSize, tileSize, tileSize)
-            }
-        }
-    }
-
-    fun renderPieces(g: Graphics) {
-        for (r in 0..7) {
-            for (c in 0..7) {
-                val piece = state.data[r][c]
-
-                piece?.let {
-                    g.color = if (it.color == PieceColor.WHITE)
-                        Color.WHITE
-                    else
-                        Color.BLACK
-                    g.drawString(it.type.name.first().toString(), c * tileSize + tileSize / 3, r * tileSize + tileSize * 2 / 3)
+                g.color = Color(255, 0, 0, 100)
+                legalMoves.forEach { tile ->
+                    g.fillRect(tile.c * tileSize, tile.r * tileSize, tileSize, tileSize)
                 }
             }
         }
     }
 
+    fun renderPieces(g: Graphics) {
+        state.tiles.forEach { tile ->
+            tile.p?.let { piece ->
+                g.color = if (piece.color == PieceColor.WHITE)
+                    Color.WHITE
+                else
+                    Color.BLACK
+                g.drawString(piece.type.name.first().toString(), tile.c * tileSize + tileSize / 3, tile.r * tileSize + tileSize * 2 / 3)
+            }
+        }
+    }
+
     fun handleClick(r: Int, c: Int) {
-        if (selection == null) {
-            selection = Pair(r,c)
+        selectedTile ?: run {
+            selectedTile = state.tile(r, c)
             repaint()
             return
         }
+        selectedTile?.let { oldSelection ->
+            val newTile = state.tile(r, c)!!
+            val legalTiles = state.legalMoves(oldSelection)
 
-        val or = selection!!.first
-        val oc = selection!!.second
-        val oldSelectionLegalMoves = state.legalMoves(or, oc)
-
-        if (oldSelectionLegalMoves.contains(r to c)) {
-            state.move(state.data[or][oc]!!, r, c)
-            selection = null
-            repaint()
-        } else {
-            selection = r to c
-            repaint()
+            if (legalTiles.contains(newTile)) {
+                state.move(oldSelection, newTile)
+                selectedTile = null
+                repaint()
+            }
+            else {
+                selectedTile = state.tile(r, c)
+                repaint()
+            }
         }
     }
 }

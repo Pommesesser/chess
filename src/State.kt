@@ -38,7 +38,7 @@ fun initialState(): State {
 fun inBounds(r: Int, c: Int): Boolean = r in 0..7 && c in 0..7
 
 data class State(val tiles: List<Tile>) {
-    private fun tile(r: Int, c: Int): Tile? {
+    fun tile(r: Int, c: Int): Tile? {
         return tiles.find { it.r == r && it.c == c }
     }
 
@@ -47,7 +47,7 @@ data class State(val tiles: List<Tile>) {
     }
 
     private fun pieces(color: PieceColor): List<Tile> {
-        tiles.filter { it.p != null }
+        return tiles.filter { it.p != null }
             .filter { it.p?.color == color }
     }
 
@@ -57,7 +57,7 @@ data class State(val tiles: List<Tile>) {
     }
 
     private fun movePutsKingInCheck(from: Tile, to: Tile): Boolean {
-        val kingTile = pieces(from.p!!.color)
+        TODO()
     }
 
     fun move(from: Tile, to: Tile) {
@@ -70,7 +70,7 @@ data class State(val tiles: List<Tile>) {
             when (it.type) {
                 PieceType.PAWN -> pawnLegalTiles(tile)
                 else -> threatenedTiles(tile)
-            }.filter { !movePutsKingInCheck(tile, it) }
+            }//.filter { !movePutsKingInCheck(tile, it) }
         } ?: emptyList()
     }
 
@@ -159,27 +159,41 @@ data class State(val tiles: List<Tile>) {
     }
 
     private fun rookThreateningTiles(tile: Tile): List<Tile> {
-        return listOf(
+        val rawLists = listOf(
             tilesInDirection(tile, 0, -1),
             tilesInDirection(tile, 0, 1),
             tilesInDirection(tile, -1, 0),
             tilesInDirection(tile, 1, 0)
-        ).flatMap { dir ->
-            dir.takeWhile { it.p == null } +
-                    dir.firstOrNull { it.p != null && it.p!!.color != tile.p!!.color }.let { listOfNotNull(it) }
-        }
+        )
+
+        return filterCapturable(tile, rawLists)
     }
 
     private fun bishopThreateningTiles(tile: Tile): List<Tile> {
-        return listOf(
+        val rawLists = listOf(
             tilesInDirection(tile, -1, -1),
             tilesInDirection(tile, 1, 1),
             tilesInDirection(tile, -1, 1),
             tilesInDirection(tile, 1, -1)
-        ).flatMap { dir ->
-            dir.takeWhile { it.p == null } +
-                    dir.firstOrNull { it.p != null && it.p!!.color != tile.p!!.color }.let { listOfNotNull(it) }
+        )
+
+        return filterCapturable(tile, rawLists)
+    }
+
+    private fun filterCapturable(from: Tile, rawLists: List<List<Tile>>): List<Tile> {
+        val filteredLists = mutableListOf<Tile>()
+        for (list in rawLists) {
+            for (t in list) {
+                if (t.p == null) {
+                    filteredLists.add(t)
+                } else if (t.p!!.color != from.p!!.color) {
+                    filteredLists.add(t)
+                    break
+                } else break
+            }
         }
+
+        return filteredLists
     }
 
     private fun tilesInDirection(fromExclusive: Tile, dx: Int, dy: Int): List<Tile> {
