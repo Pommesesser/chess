@@ -68,7 +68,11 @@ class GamePanel: JPanel() {
                     Color.WHITE
                 else
                     Color.BLACK
-                g.drawString(piece.type.name.first().toString(), tile.c * tileSize + tileSize / 3, tile.r * tileSize + tileSize * 2 / 3)
+                g.drawString(
+                    piece.type.name.first().toString(),
+                    tile.c * tileSize + tileSize / 3,
+                    tile.r * tileSize + tileSize * 2 / 3
+                )
             }
         }
     }
