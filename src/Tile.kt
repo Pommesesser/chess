@@ -1,4 +1,4 @@
-class Tile(
+data class Tile(
     val p: Piece?,
     val r: Int,
     val c: Int

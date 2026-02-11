@@ -25,6 +25,7 @@ class Panel: JPanel() {
         renderGrid(g)
         highlightSelected(g)
         highlightLegalMoves(g)
+        highlightKingInCheck(g)
         renderPieces(g)
     }
 
@@ -51,13 +52,33 @@ class Panel: JPanel() {
     fun highlightLegalMoves(g: Graphics) {
         selectedTile?.let { selection ->
             state.tile(selection.r, selection.c)?.let { tile ->
-                val legalMoves = state.legalMoves(tile)
-
                 g.color = Color(255, 0, 0, 100)
-                legalMoves.forEach { tile ->
+                state.legalTiles(tile).forEach { tile ->
                     g.fillRect(tile.c * tileSize, tile.r * tileSize, tileSize, tileSize)
                 }
             }
+        }
+    }
+
+    fun highlightKingInCheck(g: Graphics) {
+        g.color = Color(255, 0, 0)
+
+        if (state.kingIsInCheck(PieceColor.WHITE)) {
+            val king = state.king(PieceColor.WHITE)
+            g.fillRect(
+                king.c * tileSize,
+                king.r * tileSize,
+                tileSize,
+                tileSize
+            )
+        } else if (state.kingIsInCheck(PieceColor.BLACK)) {
+            val king = state.king(PieceColor.BLACK)
+            g.fillRect(
+                king.c * tileSize,
+                king.r * tileSize,
+                tileSize,
+                tileSize
+            )
         }
     }
 
@@ -91,7 +112,7 @@ class Panel: JPanel() {
                 return
             }
 
-            val legalTiles = state.legalMoves(oldTile)
+            val legalTiles = state.legalTiles(oldTile)
             if (legalTiles.contains(newTile)) {
                 state = state.move(oldTile, newTile)
                 selectedTile = null

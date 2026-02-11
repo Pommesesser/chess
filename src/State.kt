@@ -32,18 +32,17 @@ fun initialState(): State {
             tiles.add(Tile(null, r, c))
     }
 
-    return State(tiles)
+    return State(tiles, PieceColor.WHITE)
 }
 
 fun inBounds(r: Int, c: Int): Boolean = r in 0..7 && c in 0..7
 
-data class State(val tiles: List<Tile>) {
+data class State(
+    val tiles: List<Tile>,
+    val turn: PieceColor
+) {
     fun tile(r: Int, c: Int): Tile? {
         return tiles.find { it.r == r && it.c == c }
-    }
-
-    private fun king(color: PieceColor): Tile {
-        return pieces(color).find { it.p?.type == PieceType.KING }!!
     }
 
     private fun pieces(color: PieceColor): List<Tile> {
@@ -51,11 +50,32 @@ data class State(val tiles: List<Tile>) {
             .filter { it.p?.color == color }
     }
 
+    fun king(color: PieceColor): Tile {
+        return pieces(color).find { it.p?.type == PieceType.KING }!!
+    }
+
+    fun kingIsInCheck(color: PieceColor): Boolean {
+        val king = king(color)
+        return threatenedTilesByColor(opponentColor(color))
+            .contains(king)
+    }
+
+    fun terminated(): Boolean {
+        if (kingIsInCheck(PieceColor.WHITE)) {
+            if (legalTilesByColor(PieceColor.WHITE).isEmpty())
+                return true
+        }
+
+        if (kingIsInCheck(PieceColor.BLACK)) {
+            if (legalTilesByColor(PieceColor.BLACK).isEmpty())
+                return true
+        }
+
+        return false
+    }
+
     private fun opponentColor(color: PieceColor): PieceColor =
         if (color == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
-
-    private fun threatenedTilesByColor(threateningColor: PieceColor): List<Tile> =
-        pieces(threateningColor).flatMap { threatenedTiles(it) }
 
     private fun movePutsKingInCheck(from: Tile, to: Tile): Boolean {
         val newState = move(from, to)
@@ -73,17 +93,24 @@ data class State(val tiles: List<Tile>) {
                 else -> Tile(tile.p, tile.r, tile.c)
             }
         }
-        return State(newTiles)
+
+        return State(newTiles, opponentColor(turn))
     }
 
-    fun legalMoves(tile: Tile): List<Tile> {
+    fun legalTiles(tile: Tile): List<Tile> {
         return tile.p?.let {
+            if (it.color != turn)
+                return emptyList()
+
             when (it.type) {
                 PieceType.PAWN -> pawnLegalTiles(tile)
                 else -> threatenedTiles(tile)
             }.filter { !movePutsKingInCheck(tile, it) }
         } ?: emptyList()
     }
+
+    private fun legalTilesByColor(color: PieceColor): List<Tile> =
+        pieces(color).flatMap { legalTiles(it) }
 
     private fun threatenedTiles(tile: Tile): List<Tile> {
         return tile.p?.let {
@@ -97,6 +124,9 @@ data class State(val tiles: List<Tile>) {
             }
         } ?: emptyList()
     }
+
+    private fun threatenedTilesByColor(threateningColor: PieceColor): List<Tile> =
+        pieces(threateningColor).flatMap { threatenedTiles(it) }
 
     private fun pawnLegalTiles(tile: Tile): List<Tile> {
         val movementTiles = mutableListOf<Tile>()
@@ -197,7 +227,7 @@ data class State(val tiles: List<Tile>) {
             for (t in list) {
                 if (t.p == null) {
                     filteredLists.add(t)
-                } else if (t.p!!.color != from.p!!.color) {
+                } else if (t.p.color != from.p!!.color) {
                     filteredLists.add(t)
                     break
                 } else break
