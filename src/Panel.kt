@@ -93,7 +93,7 @@ class Panel: JPanel() {
 
             val legalTiles = state.legalMoves(oldTile)
             if (legalTiles.contains(newTile)) {
-                state.move(oldTile, newTile)
+                state = state.move(oldTile, newTile)
                 selectedTile = null
                 repaint()
             } else {

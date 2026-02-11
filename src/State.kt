@@ -51,18 +51,29 @@ data class State(val tiles: List<Tile>) {
             .filter { it.p?.color == color }
     }
 
-    private fun threatenedBy(target: Tile, threateningColor: PieceColor): Boolean {
-        return pieces(threateningColor).flatMap { threatenedTiles(it) }
-            .contains(target)
-    }
+    private fun opponentColor(color: PieceColor): PieceColor =
+        if (color == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
+
+    private fun threatenedTilesByColor(threateningColor: PieceColor): List<Tile> =
+        pieces(threateningColor).flatMap { threatenedTiles(it) }
 
     private fun movePutsKingInCheck(from: Tile, to: Tile): Boolean {
-        TODO()
+        val newState = move(from, to)
+        val color = from.p!!.color
+        val kingTile = newState.king(color)
+
+        return newState.threatenedTilesByColor(opponentColor(color)).contains(kingTile)
     }
 
-    fun move(from: Tile, to: Tile) {
-        to.p = from.p
-        from.p = null
+    fun move(from: Tile, to: Tile): State {
+        val newTiles = tiles.map { tile ->
+            when {
+                tile.r == from.r && tile.c == from.c -> Tile(null, tile.r, tile.c)      // empty original
+                tile.r == to.r && tile.c == to.c -> Tile(from.p, tile.r, tile.c)
+                else -> Tile(tile.p, tile.r, tile.c)
+            }
+        }
+        return State(newTiles)
     }
 
     fun legalMoves(tile: Tile): List<Tile> {
@@ -70,7 +81,7 @@ data class State(val tiles: List<Tile>) {
             when (it.type) {
                 PieceType.PAWN -> pawnLegalTiles(tile)
                 else -> threatenedTiles(tile)
-            }//.filter { !movePutsKingInCheck(tile, it) }
+            }.filter { !movePutsKingInCheck(tile, it) }
         } ?: emptyList()
     }
 
@@ -140,7 +151,7 @@ data class State(val tiles: List<Tile>) {
                     tile(tile.r + 1, tile.c + 1)
                 )
             }
-        }.filter { it.p == null || it.p!!.color != tile.p!!.color }
+        }.filter { it.p == null || it.p.color != tile.p.color }
     }
 
     private fun pawnCapturableTiles(tile: Tile): List<Tile> = pawnThreateningTiles(tile).filter { it.p != null }

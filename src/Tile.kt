@@ -1,5 +1,5 @@
 class Tile(
-    var p: Piece?,
+    val p: Piece?,
     val r: Int,
     val c: Int
 ) {
