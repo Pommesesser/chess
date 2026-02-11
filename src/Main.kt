@@ -10,9 +10,9 @@ fun main() {
         frame.isResizable = false
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
-        val gamePanel = GamePanel()
-        gamePanel.preferredSize = Dimension(DIM, DIM)
-        frame.add(gamePanel)
+        val panel = Panel()
+        panel.preferredSize = Dimension(DIM, DIM)
+        frame.add(panel)
 
         frame.pack()
         frame.setLocationRelativeTo(null)

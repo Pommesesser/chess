@@ -6,7 +6,7 @@ import javax.swing.JPanel
 
 const val tileSize = DIM / 8
 
-class GamePanel: JPanel() {
+class Panel: JPanel() {
     var state = initialState()
     var selectedTile: Tile? = null
 
