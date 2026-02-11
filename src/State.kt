@@ -68,7 +68,7 @@ data class State(val tiles: List<Tile>) {
     fun move(from: Tile, to: Tile): State {
         val newTiles = tiles.map { tile ->
             when {
-                tile.r == from.r && tile.c == from.c -> Tile(null, tile.r, tile.c)      // empty original
+                tile.r == from.r && tile.c == from.c -> Tile(null, tile.r, tile.c)
                 tile.r == to.r && tile.c == to.c -> Tile(from.p, tile.r, tile.c)
                 else -> Tile(tile.p, tile.r, tile.c)
             }
