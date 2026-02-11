@@ -83,16 +83,20 @@ class GamePanel: JPanel() {
             repaint()
             return
         }
-        selectedTile?.let { oldSelection ->
+        selectedTile?.let { oldTile ->
             val newTile = state.tile(r, c)!!
-            val legalTiles = state.legalMoves(oldSelection)
-
-            if (legalTiles.contains(newTile)) {
-                state.move(oldSelection, newTile)
+            if (oldTile.r == newTile.r && oldTile.c == newTile.c) {
                 selectedTile = null
                 repaint()
+                return
             }
-            else {
+
+            val legalTiles = state.legalMoves(oldTile)
+            if (legalTiles.contains(newTile)) {
+                state.move(oldTile, newTile)
+                selectedTile = null
+                repaint()
+            } else {
                 selectedTile = state.tile(r, c)
                 repaint()
             }
