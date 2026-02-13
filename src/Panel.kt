@@ -119,7 +119,7 @@ class Panel: JPanel() {
     fun renderPieces(g: Graphics) {
         state.tiles.forEach { tile ->
             tile.p?.let { piece ->
-                g.color = if (piece.color == PieceColor.WHITE)
+                g.color = if (piece.col == PieceColor.WHITE)
                     Color.WHITE
                 else
                     Color.BLACK

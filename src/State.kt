@@ -8,30 +8,30 @@ data class State(
             val tiles = mutableListOf<Tile>()
 
             for (c in 0..7) {
-                tiles.add(Tile(Piece(PieceType.PAWN, PieceColor.BLACK), 1, c))
-                tiles.add(Tile(Piece(PieceType.PAWN, PieceColor.WHITE), 6, c))
+                tiles.add(Tile(Piece(PieceType.PAWN, PieceColor.BLACK, 0), 1, c))
+                tiles.add(Tile(Piece(PieceType.PAWN, PieceColor.WHITE, 0), 6, c))
             }
 
-            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.BLACK), 0, 0))
-            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.BLACK), 0, 7))
-            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.WHITE), 7, 0))
-            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.WHITE), 7, 7))
+            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.BLACK, 0), 0, 0))
+            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.BLACK, 0), 0, 7))
+            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.WHITE, 0), 7, 0))
+            tiles.add(Tile(Piece(PieceType.ROOK, PieceColor.WHITE, 0), 7, 7))
 
-            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.BLACK), 0, 1))
-            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.BLACK), 0, 6))
-            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.WHITE), 7, 1))
-            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.WHITE), 7, 6))
+            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.BLACK, 0), 0, 1))
+            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.BLACK, 0), 0, 6))
+            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.WHITE, 0), 7, 1))
+            tiles.add(Tile(Piece(PieceType.KNIGHT, PieceColor.WHITE, 0), 7, 6))
 
-            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.BLACK), 0, 2))
-            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.BLACK), 0, 5))
-            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.WHITE), 7, 2))
-            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.WHITE), 7, 5))
+            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.BLACK, 0), 0, 2))
+            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.BLACK, 0), 0, 5))
+            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.WHITE, 0), 7, 2))
+            tiles.add(Tile(Piece(PieceType.BISHOP, PieceColor.WHITE, 0), 7, 5))
 
-            tiles.add(Tile(Piece(PieceType.QUEEN, PieceColor.BLACK), 0, 3))
-            tiles.add(Tile(Piece(PieceType.QUEEN, PieceColor.WHITE), 7, 3))
+            tiles.add(Tile(Piece(PieceType.QUEEN, PieceColor.BLACK, 0), 0, 3))
+            tiles.add(Tile(Piece(PieceType.QUEEN, PieceColor.WHITE, 0), 7, 3))
 
-            tiles.add(Tile(Piece(PieceType.KING, PieceColor.BLACK), 0, 4))
-            tiles.add(Tile(Piece(PieceType.KING, PieceColor.WHITE), 7, 4))
+            tiles.add(Tile(Piece(PieceType.KING, PieceColor.BLACK, 0), 0, 4))
+            tiles.add(Tile(Piece(PieceType.KING, PieceColor.WHITE, 0), 7, 4))
 
             for (r in 2..5) {
                 for (c in 0..7)
@@ -48,7 +48,7 @@ data class State(
 
     private fun pieces(color: PieceColor): List<Tile> {
         return tiles.filter { it.p != null }
-            .filter { it.p?.color == color }
+            .filter { it.p?.col == color }
     }
 
     fun king(color: PieceColor): Tile {
@@ -63,27 +63,28 @@ data class State(
 
     private fun movePutsKingInCheck(from: Tile, to: Tile): Boolean {
         val newState = simulateMove(from, to)
-        return newState.kingIsInCheck(from.p!!.color)
+        return newState.kingIsInCheck(from.p!!.col)
     }
 
-    fun hasLegalMoves(): Boolean {
-        return pieces(turn).any { tile -> legalTiles(tile).isNotEmpty() }
-    }
+    /*
+    fun hasLegalMoves(): Boolean =
+        pieces(turn).any { tile -> legalTiles(tile).isNotEmpty() }
 
-    fun isCheckmate(): Boolean =
+    fun checkmate(): Boolean =
         kingIsInCheck(turn) && !hasLegalMoves()
 
-    fun isStalemate(): Boolean =
+    fun stalemate(): Boolean =
         !kingIsInCheck(turn) && !hasLegalMoves()
 
-    fun isGameOver(): Boolean =
+    fun gameOver(): Boolean =
         !hasLegalMoves()
+     */
 
     private fun simulateMove(from: Tile, to: Tile): State {
         val newTiles = tiles.map { tile ->
             when {
                 tile.r == from.r && tile.c == from.c -> Tile(null, tile.r, tile.c)
-                tile.r == to.r && tile.c == to.c -> Tile(from.p, tile.r, tile.c)
+                tile.r == to.r && tile.c == to.c -> Tile(from.p?.copy(mov = from.p.mov + 1), tile.r, tile.c)
                 else -> tile
             }
         }
@@ -96,7 +97,7 @@ data class State(
     }
 
     fun legalTiles(tile: Tile): List<Tile> {
-        if (tile.p?.color != turn)
+        if (tile.p?.col != turn)
             return emptyList()
 
         val baseMoves = when (tile.p.type) {
@@ -124,23 +125,23 @@ data class State(
 
     private fun pawnLegalTiles(tile: Tile): List<Tile> {
         val moves = mutableListOf<Tile>()
-        val dir = if (tile.p!!.color == PieceColor.WHITE) -1 else 1
+        val dir = if (tile.p!!.col == PieceColor.WHITE) -1 else 1
 
         tile(tile.r + dir, tile.c)?.let { if (it.p == null) moves.add(it) }
-        if ((tile.r == 6 && tile.p.color == PieceColor.WHITE) || (tile.r == 1 && tile.p.color == PieceColor.BLACK)) {
+        if ((tile.r == 6 && tile.p.col == PieceColor.WHITE) || (tile.r == 1 && tile.p.col == PieceColor.BLACK)) {
             if (tile(tile.r + dir, tile.c)?.p == null && tile(tile.r + 2 * dir, tile.c)?.p == null) {
                 tile(tile.r + 2 * dir, tile.c)?.let { moves.add(it) }
             }
         }
 
         listOfNotNull(tile(tile.r + dir, tile.c - 1), tile(tile.r + dir, tile.c + 1)).forEach {
-            if (it.p != null && it.p.color != tile.p.color) moves.add(it)
+            if (it.p != null && it.p.col != tile.p.col) moves.add(it)
         }
         return moves
     }
 
     private fun pawnThreateningTiles(tile: Tile): List<Tile> {
-        val dir = if (tile.p!!.color == PieceColor.WHITE) -1 else 1
+        val dir = if (tile.p!!.col == PieceColor.WHITE) -1 else 1
         return listOfNotNull(tile(tile.r + dir, tile.c - 1), tile(tile.r + dir, tile.c + 1))
     }
 
@@ -154,7 +155,7 @@ data class State(
             tile(tile.r + 1, tile.c + 2),
             tile(tile.r + 2, tile.c - 1),
             tile(tile.r + 2, tile.c + 1)
-        ).filter { it.p?.color != tile.p!!.color }
+        ).filter { it.p?.col != tile.p!!.col }
     }
 
     private fun rookThreateningTiles(tile: Tile): List<Tile> {
@@ -185,7 +186,7 @@ data class State(
             for (t in list) {
                 if (t.p == null) {
                     filteredLists.add(t)
-                } else if (t.p.color != from.p!!.color) {
+                } else if (t.p.col != from.p!!.col) {
                     filteredLists.add(t)
                     break
                 } else break
@@ -221,6 +222,6 @@ data class State(
             tile(tile.r + 1, tile.c - 1),
             tile(tile.r + 1, tile.c),
             tile(tile.r + 1, tile.c + 1)
-        ).filter { it.p?.color != tile.p!!.color }
+        ).filter { it.p?.col != tile.p!!.col }
     }
 }

@@ -1,4 +1,5 @@
-class Piece(
+data class Piece(
     val type: PieceType,
-    val color: PieceColor
+    val col: PieceColor,
+    val mov: Int
 )
